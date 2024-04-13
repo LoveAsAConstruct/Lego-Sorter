@@ -2,6 +2,8 @@ import os
 import cv2
 import random
 import numpy as np
+from PIL import Image
+
 from brick_data_struct import *
 
 IMAGE_PATH = "archive\\LEGO brick images v1"
@@ -61,3 +63,5 @@ def write_original_images(brickdict, num_alts = 10):
             output_path = os.path.join("dataset", f"processed_{id}_{i}.png")
             cv2.imwrite(output_path, noisy_img)
 
+def sample_dataset():
+    dataset_dir = "/path/to/your/dataset"
