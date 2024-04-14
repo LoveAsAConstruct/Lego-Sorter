@@ -1,5 +1,6 @@
 import os
 import cv2
+import csv
 import random
 import numpy as np
 from PIL import Image
@@ -13,23 +14,23 @@ brickDict = {}
 def get_image_info():
     pathdict = {}
     id = 0
+    index = 0
     for directory in os.listdir(IMAGE_PATH):
         image_folder = f"{IMAGE_PATH}\\{directory}"
         folder_type = directory
         for image in os.listdir(image_folder):
             image_directory = f"{image_folder}\\{image}"
             pathdict.update({
-                id: {
+                index: {
                     "id": id,
                     "path": image_directory,
                     "type": folder_type
                 }
             })
-            id += 1
+            index += 1
+        id += 1
     print(f"Obtained {len(pathdict)} image paths")
     return pathdict
-
-brickdict = get_image_info() 
 
 def write_original_images(brickdict, num_alts = 10):
     for id in brickdict:
@@ -60,15 +61,42 @@ def write_original_images(brickdict, num_alts = 10):
             # Add noise to the processed image
             noise = np.random.normal(0, random.random()*20, processed_img.shape)
             noisy_img = np.clip(processed_img + noise, 0, 255).astype(np.uint8)
-            output_path = os.path.join("dataset", f"processed_{id}_{i}.png")
+            output_path = os.path.join("data/raw_dataset", f"processed_{id}_{i}.png")
             cv2.imwrite(output_path, noisy_img)
 
 def sample_dataset(width, height):
-    dataset_dir = "raw_dataset"
-    resized_dir = "sampled_data"
+    dataset_dir = "data/raw_dataset"
+    resized_dir = "data/sampled_data"
     for image_path in os.listdir(dataset_dir):
         img = Image.open(os.path.join(dataset_dir, image_path))
         resized_image = img.resize((width,height))
         resized_image.save(os.path.join(resized_dir, image_path))
     print("Resample complete")
-sample_dataset(100,100)
+
+def map_dataset():
+    resized_dir = "data/raw_dataset"
+    csv_file = "data/classification.csv"
+    with open(csv_file, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["ID, Filename, Classification"])
+        id = 0
+        for image_name in os.listdir(resized_dir):
+            if image_name.endswith(".png"):
+                class_id = image_name.split("_")[1]
+                writer.writerow([id, image_name, class_id])
+                id += 1
+
+
+def dict_to_csv(data, csv_file):
+    with open(csv_file, 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=data.keys())
+        writer.writeheader()
+        for row_data in zip(*data.values()):
+            writer.writerow(dict(zip(data.keys(), row_data)))
+
+
+brickdict = get_image_info() 
+dict_to_csv(brickdict, "data/brickdict.csv")
+write_original_images(brickdict, 4)
+sample_dataset(100, 100)
+map_dataset()

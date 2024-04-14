@@ -1,3 +1,4 @@
 /archive.zip
 data/**/*.jpg
 data/**/*.png
+venv/
