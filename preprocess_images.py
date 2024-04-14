@@ -9,10 +9,9 @@ from brick_data_struct import *
 
 IMAGE_PATH = "archive\\LEGO brick images v1"
 
-brickDict = {}
 
 def get_image_info():
-    pathdict = {}
+    pathdict = []
     id = 0
     index = 0
     for directory in os.listdir(IMAGE_PATH):
@@ -20,21 +19,21 @@ def get_image_info():
         folder_type = directory
         for image in os.listdir(image_folder):
             image_directory = f"{image_folder}\\{image}"
-            pathdict.update({
-                index: {
+            pathdict.append(
+                {
                     "id": id,
                     "path": image_directory,
                     "type": folder_type
                 }
-            })
+            )
             index += 1
         id += 1
-    print(f"Obtained {len(pathdict)} image paths")
+    print(f"Obtained {len(pathdict)} image paths with {id} UIDs")
     return pathdict
 
 def write_original_images(brickdict, num_alts = 10):
-    for id in brickdict:
-        original_img = cv2.imread(brickdict[id]["path"], cv2.IMREAD_UNCHANGED)  # Load the image with alpha channel
+    for i, index in enumerate(brickdict):
+        original_img = cv2.imread(index["path"], cv2.IMREAD_UNCHANGED)  # Load the image with alpha channel
         background_color = (255, 255, 255, 255)  # White background with full opacity
         background_img = np.full_like(original_img, background_color)
 
@@ -47,7 +46,7 @@ def write_original_images(brickdict, num_alts = 10):
         # Invert the mask to keep the non-transparent parts
         mask_inv = cv2.bitwise_not(mask)
 
-        for i in range(0, num_alts):
+        for j in range(0, num_alts):
             # Adjust brightness of the non-transparent parts of the original image
             brightness_factor = random.random() * 1.2  # Modify this value to adjust brightness
             bright_img = cv2.convertScaleAbs(original_img[:, :, :3], alpha=brightness_factor, beta=0)
@@ -61,7 +60,7 @@ def write_original_images(brickdict, num_alts = 10):
             # Add noise to the processed image
             noise = np.random.normal(0, random.random()*20, processed_img.shape)
             noisy_img = np.clip(processed_img + noise, 0, 255).astype(np.uint8)
-            output_path = os.path.join("data/raw_dataset", f"processed_{id}_{i}.png")
+            output_path = os.path.join("data/raw_dataset", f"processed_{index['id']}_{i}_{j}.png")
             cv2.imwrite(output_path, noisy_img)
 
 def sample_dataset(width, height):
@@ -87,16 +86,36 @@ def map_dataset():
                 id += 1
 
 
-def dict_to_csv(data, csv_file):
-    with open(csv_file, 'w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=data.keys())
+def store_dicts_to_csv(data, filename):
+    """
+    Stores a list of dictionaries to a CSV file.
+
+    Parameters:
+        data (list of dict): The list of dictionaries to store. Each dictionary should have the same structure.
+        filename (str): The path to the CSV file where data will be stored.
+    """
+    if not data:
+        print("The provided data list is empty.")
+        return
+
+    # Assuming all dictionaries have the same keys, use the keys from the first dictionary for fieldnames
+    fieldnames = data[0].keys()
+
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+        # Write the header
         writer.writeheader()
-        for row_data in zip(*data.values()):
-            writer.writerow(dict(zip(data.keys(), row_data)))
+
+        # Write data rows
+        for item in data:
+            writer.writerow(item)
+
+    print(f"Data has been successfully written to {filename}")
 
 
 brickdict = get_image_info() 
-dict_to_csv(brickdict, "data/brickdict.csv")
+store_dicts_to_csv(brickdict, "data/brickdict.csv")
 write_original_images(brickdict, 4)
 sample_dataset(100, 100)
 map_dataset()
