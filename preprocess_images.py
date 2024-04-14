@@ -63,5 +63,12 @@ def write_original_images(brickdict, num_alts = 10):
             output_path = os.path.join("dataset", f"processed_{id}_{i}.png")
             cv2.imwrite(output_path, noisy_img)
 
-def sample_dataset():
-    dataset_dir = "/path/to/your/dataset"
+def sample_dataset(width, height):
+    dataset_dir = "raw_dataset"
+    resized_dir = "sampled_data"
+    for image_path in os.listdir(dataset_dir):
+        img = Image.open(os.path.join(dataset_dir, image_path))
+        resized_image = img.resize((width,height))
+        resized_image.save(os.path.join(resized_dir, image_path))
+    print("Resample complete")
+sample_dataset(100,100)
