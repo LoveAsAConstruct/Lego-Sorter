@@ -1,0 +1,34 @@
+Model: "sequential_12"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ rescaling_12 (Rescaling)    (None, 180, 180, 3)       0         
+                                                                 
+ conv2d_36 (Conv2D)          (None, 180, 180, 8)       224       
+                                                                 
+ max_pooling2d_36 (MaxPoolin  (None, 90, 90, 8)        0         
+ g2D)                                                            
+                                                                 
+ conv2d_37 (Conv2D)          (None, 90, 90, 4)         292       
+                                                                 
+ max_pooling2d_37 (MaxPoolin  (None, 45, 45, 4)        0         
+ g2D)                                                            
+                                                                 
+ conv2d_38 (Conv2D)          (None, 45, 45, 4)         148       
+                                                                 
+ max_pooling2d_38 (MaxPoolin  (None, 22, 22, 4)        0         
+ g2D)                                                            
+                                                                 
+ flatten_12 (Flatten)        (None, 1936)              0         
+                                                                 
+ dropout_12 (Dropout)        (None, 1936)              0         
+                                                                 
+ dense_24 (Dense)            (None, 128)               247936    
+                                                                 
+ dense_25 (Dense)            (None, 16)                2064      
+                                                                 
+=================================================================
+Total params: 250,664
+Trainable params: 250,664
+Non-trainable params: 0
+_________________________________________________________________

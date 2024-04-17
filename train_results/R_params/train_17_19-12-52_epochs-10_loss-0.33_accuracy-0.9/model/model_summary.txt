@@ -1,0 +1,34 @@
+Model: "sequential_15"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ rescaling_15 (Rescaling)    (None, 180, 180, 3)       0         
+                                                                 
+ conv2d_45 (Conv2D)          (None, 180, 180, 128)     3584      
+                                                                 
+ max_pooling2d_45 (MaxPoolin  (None, 90, 90, 128)      0         
+ g2D)                                                            
+                                                                 
+ conv2d_46 (Conv2D)          (None, 90, 90, 2)         2306      
+                                                                 
+ max_pooling2d_46 (MaxPoolin  (None, 45, 45, 2)        0         
+ g2D)                                                            
+                                                                 
+ conv2d_47 (Conv2D)          (None, 45, 45, 64)        1216      
+                                                                 
+ max_pooling2d_47 (MaxPoolin  (None, 22, 22, 64)       0         
+ g2D)                                                            
+                                                                 
+ flatten_15 (Flatten)        (None, 30976)             0         
+                                                                 
+ dropout_15 (Dropout)        (None, 30976)             0         
+                                                                 
+ dense_30 (Dense)            (None, 128)               3965056   
+                                                                 
+ dense_31 (Dense)            (None, 16)                2064      
+                                                                 
+=================================================================
+Total params: 3,974,226
+Trainable params: 3,974,226
+Non-trainable params: 0
+_________________________________________________________________
