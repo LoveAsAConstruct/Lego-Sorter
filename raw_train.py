@@ -2,13 +2,14 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import random
 from contextlib import redirect_stdout
 from datetime import datetime
 
 HEIGHT = 180
 WIDTH = 180
 
-def run_training_and_save_all(data_dir, model, base_run_dir='train_results/t', epochs=10, batch_size=32):
+def run_training_and_save_all(data_dir, model, base_run_dir='train_results', epochs=10, batch_size=32):
     # Setup
     AUTOTUNE = tf.data.AUTOTUNE
 
@@ -49,10 +50,12 @@ def run_training_and_save_all(data_dir, model, base_run_dir='train_results/t', e
         validation_data=val_ds,
         epochs=epochs
     )
+    loss, accuracy = model.evaluate(val_ds)
+    print(f'Loss: {loss}, Accuracy: {accuracy}')
 
     # Generate a unique directory name with the current date and time
     current_time = datetime.now().strftime("%d_%H-%M-%S")
-    run_dir = f"{base_run_dir}_{current_time}_epochs-{epochs}"
+    run_dir = f"{base_run_dir}/train_{current_time}_epochs-{epochs}_loss-{round(loss,2)}_accuracy-{round(accuracy,2)}"
     os.makedirs(run_dir, exist_ok=True)
 
     # Save model and weights
@@ -67,13 +70,17 @@ def run_training_and_save_all(data_dir, model, base_run_dir='train_results/t', e
     with open(os.path.join(model_path, 'model_summary.txt'), 'w') as f:
         with redirect_stdout(f):
             model.summary()
-
+    
     # Save training history
     history_df = pd.DataFrame(history.history)
     history_df['epoch'] = history_df.index + 1
     results_path = os.path.join(run_dir, 'results')
     os.makedirs(results_path, exist_ok=True)
     history_df.to_csv(os.path.join(results_path, 'training_history.csv'), index=False)
+
+    with open(os.path.join(results_path, 'loss_accuracy.txt'), 'w') as f:
+        with redirect_stdout(f):
+            print(f'Loss: {loss}, Accuracy: {accuracy}')
 
     # Generate and save plots
     epochs_range = range(epochs)
@@ -97,18 +104,31 @@ def run_training_and_save_all(data_dir, model, base_run_dir='train_results/t', e
     plt.savefig(os.path.join(results_path, 'results_graph.png'))
     plt.close()
 
-
 model = tf.keras.Sequential([
-    tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
-    tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dropout(0.7),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(16)
+        tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
+        tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(16)
 ])
-run_training_and_save_all("archive\LEGO brick images v1", model)
+for x in range(0,20):
+    model = tf.keras.Sequential([
+        tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
+        tf.keras.layers.Conv2D(2**random.randint(0,7), 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(2**random.randint(0,7), 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(2**random.randint(0,7), 3, padding='same', activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dropout(random.random()*0.5),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(16)
+    ])
+    run_training_and_save_all("archive\LEGO brick images v1", model,"train_results\R_params",10)
