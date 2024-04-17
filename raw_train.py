@@ -104,6 +104,45 @@ def run_training_and_save_all(data_dir, model, base_run_dir='train_results', epo
     plt.savefig(os.path.join(results_path, 'results_graph.png'))
     plt.close()
 
+def generate_random_model(input_shape=(HEIGHT, WIDTH, 3)):
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Rescaling(1./255, input_shape=input_shape))
+    
+    # Randomly decide the number of convolutional layers
+    num_conv_layers = random.randint(1, 5)
+    
+    for _ in range(num_conv_layers):
+        # Randomize the number of filters, kernel size, and whether to use padding
+        filters = 2 ** random.randint(0, 7)
+        kernel_size = random.choice([3, 5])
+        padding = random.choice(['same', 'valid'])
+        model.add(tf.keras.layers.Conv2D(filters, kernel_size, padding=padding, activation='relu'))
+        
+        # Optionally add a MaxPooling layer after each convolutional layer
+        if random.random() < 0.5:
+            pool_size = random.choice([2, 3])
+            model.add(tf.keras.layers.MaxPooling2D(pool_size=pool_size))
+    
+    # Flatten the output from the conv layers to connect to dense layers
+    model.add(tf.keras.layers.Flatten())
+    
+    # Randomly add dropout layers
+    if random.random() < 0.5:
+        dropout_rate = random.random() * 0.5
+        model.add(tf.keras.layers.Dropout(dropout_rate))
+    
+    # Randomize the number of dense layers
+    num_dense_layers = random.randint(1, 3)
+    for _ in range(num_dense_layers):
+        units = random.choice([64, 128, 256])
+        model.add(tf.keras.layers.Dense(units, activation='relu'))
+    
+    # Final layer
+    model.add(tf.keras.layers.Dense(16))  # Adjust the number of output nodes if necessary
+    
+    return model
+
+
 model = tf.keras.Sequential([
         tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
         tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
@@ -117,18 +156,6 @@ model = tf.keras.Sequential([
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dense(16)
 ])
-for x in range(0,20):
-    model = tf.keras.Sequential([
-        tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
-        tf.keras.layers.Conv2D(2**random.randint(0,7), 3, padding='same', activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(2**random.randint(0,7), 3, padding='same', activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(2**random.randint(0,7), 3, padding='same', activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dropout(random.random()*0.5),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(16)
-    ])
+for x in range(0,10):
+    generate_random_model()
     run_training_and_save_all("archive\LEGO brick images v1", model,"train_results\R_params",10)
