@@ -5,7 +5,7 @@ import random
 import numpy as np
 from PIL import Image
 
-from deprecated.data.brick_data_struct import *
+from deprecated.brick_data_struct import *
 
 IMAGE_PATH = "archive\\LEGO brick images v1"
 
