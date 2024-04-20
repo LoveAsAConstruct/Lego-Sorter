@@ -46,7 +46,7 @@ conda env create -f environment.yml
 ~~~
 Activate your Conda environment:
 ~~~
-conda activate myenv
+conda activate tf
 ~~~
 This environment should be set up with all the packages needed to run `train.py`. However, if you need to reinstall, `requirements.txt` contains all the packages used, which can be installed through pip:
 ~~~
