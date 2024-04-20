@@ -5,6 +5,7 @@
 This project demonstrates the use of neural networks for image classification and is created for CSCI-e80's week 5 exploratory project. This repository documents my experience with setting up and experimenting with convolutional neural networks.
 
 More information on the assignment can be found [here](https://cs50.harvard.edu/extension/ai/2024/spring/projects/5/exploratory/).
+This project's Github repository can be found [here](https://github.com/LoveAsAConstruct/Lego-Sorter)
 
 Before beginning the setup, here are a few important notes:
 - You will interact mainly with the `train.py` script. Usage is as follows:
