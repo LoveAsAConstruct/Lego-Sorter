@@ -141,36 +141,37 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", action="store_true", help="Enable verbose mode")
     parser.add_argument("--name", type=str, default="train", help="Run name")
     parser.add_argument("--save_dir", type=str, default="train_results", help="Directory to save runtime folder")
+    parser.add_argument("--runs", type=int, default=1, help="# of runs to test (reccomended with random)")
 
     args = parser.parse_args()
+    for _ in range(0,args.runs):
+        # Select model
+        if args.random:
+            from model_randomization import generate_random_model
+            model = generate_random_model()
+        else:
+            # ol' reliable
+            model = tf.keras.Sequential([
+                tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
+                tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+                tf.keras.layers.MaxPooling2D(),
+                tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+                tf.keras.layers.MaxPooling2D(),
+                tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+                tf.keras.layers.MaxPooling2D(),
+                tf.keras.layers.Flatten(),
+                tf.keras.layers.Dropout(0.2),
+                tf.keras.layers.Dense(128, activation='relu'),
+                tf.keras.layers.Dense(16)
+            ])
 
-    # Select model
-    if args.random:
-        from model_randomization import generate_random_model
-        model = generate_random_model()
-    else:
-        # ol' reliable
-        model = tf.keras.Sequential([
-            tf.keras.layers.Rescaling(1./255, input_shape=(HEIGHT, WIDTH, 3)),
-            tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-            tf.keras.layers.MaxPooling2D(),
-            tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-            tf.keras.layers.MaxPooling2D(),
-            tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-            tf.keras.layers.MaxPooling2D(),
-            tf.keras.layers.Flatten(),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(128, activation='relu'),
-            tf.keras.layers.Dense(16)
-        ])
-
-    # Run training
-    run_training_and_save_all(
-        model=model,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        data_dir=args.data_dir,
-        verbose=args.verbose,
-        name=args.name,
-        base_run_dir=args.save_dir
-    )
+        # Run training
+        run_training_and_save_all(
+            model=model,
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            data_dir=args.data_dir,
+            verbose=args.verbose,
+            name=args.name,
+            base_run_dir=args.save_dir
+        )
